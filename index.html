@@ -1196,6 +1196,115 @@ body.classic #story.active .story{
   padding-bottom:2px!important;
 }
 
+
+/* Tutorial / beta clarity pass */
+.modal-title-bang{
+  color:var(--red);
+}
+.tutorial-card{
+  max-width:760px;
+}
+.tutorial-page{
+  text-align:center;
+}
+.tutorial-visual{
+  display:grid;
+  grid-template-columns:repeat(3,58px);
+  grid-template-rows:repeat(3,72px);
+  gap:6px;
+  justify-content:center;
+  margin:14px auto 12px;
+}
+.tutorial-mini-card{
+  background:#efe4c7;
+  color:#111;
+  border:3px solid var(--line);
+  box-shadow:3px 3px #000;
+  display:grid;
+  place-items:center;
+  position:relative;
+  font-size:18px;
+}
+.tutorial-mini-card.win{outline:4px solid #38b764}
+.tutorial-mini-card.dead{background:#c92828;color:#fff}
+.tutorial-mini-card.tie{outline:4px solid #fff}
+.tutorial-mini-royals{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin:14px 0;
+  flex-wrap:wrap;
+}
+.tutorial-royal{
+  width:58px;
+  height:72px;
+  background:#efe4c7;
+  color:#111;
+  border:3px solid var(--line);
+  box-shadow:3px 3px #000;
+  display:grid;
+  place-items:center;
+  font-size:20px;
+}
+.tutorial-note{
+  max-width:650px;
+  margin:10px auto;
+  line-height:1.85;
+}
+.tutorial-count{
+  color:var(--muted);
+  text-align:center;
+  margin-top:8px;
+  font-size:9px;
+}
+.tutorial-actions{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+  border-top:3px double var(--line);
+  padding-top:12px;
+  margin-top:14px;
+}
+/* one more pixel up for selected red x */
+.check{
+  padding-bottom:3px!important;
+}
+
+
+.tutorial-power-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:14px auto 12px;
+  max-width:620px;
+}
+.tutorial-power-card{
+  border:2px solid var(--line);
+  background:rgba(0,0,0,.12);
+  padding:10px;
+  display:grid;
+  grid-template-columns:58px 1fr;
+  grid-template-rows:auto auto;
+  gap:4px 10px;
+  align-items:center;
+  text-align:left;
+}
+.tutorial-power-card .tutorial-royal{
+  grid-row:1 / span 2;
+  margin:0;
+}
+.tutorial-power-card b{
+  color:var(--gold);
+  line-height:1.5;
+}
+.tutorial-power-card span{
+  line-height:1.55;
+}
+@media(max-width:620px){
+  .tutorial-power-grid{grid-template-columns:1fr}
+}
+
 @media(max-width:1100px){
   .battle-layout{grid-template-columns:1fr}
   .center-column{order:3}
@@ -1346,6 +1455,11 @@ body.classic #story.active .story{
 
 
 
+
+<div id="tutorialModal" class="modal" onclick="closeTutorial(event)">
+  <div class="modal-card tutorial-card" id="tutorialContent"></div>
+</div>
+
 <div id="announcementModal" class="modal">
   <div class="modal-card announcement-card">
     <h2 id="announcementTitleNode">Welcome to Foursuit!</h2>
@@ -1377,10 +1491,11 @@ const verFlag = true; // true=show version badge, false=hide version badge
 const selectInfo = true; // true=show suit/faction selection helper on menu
 const selectInfoPosition = 1; // 1=above cards, 2=below cards
 const announcementEnabled = true;
-const announcementId = "beta-0-1-launch";
+const announcementId = "beta-0-1-tutorial";
 const announcementTitle = "Welcome to Foursuit!";
 const announcementBody = `
   <p>Welcome to the Foursuit! beta test.</p>
+  <p>Check out the tutorial in the <b>Rules</b> section!</p>
   <p>Please send your feedback to:<br><a href="https://x.com/foursuit" target="_blank" rel="noopener">x.com/foursuit</a></p>
 `;
 let soundOn = true;
@@ -2731,7 +2846,7 @@ function maybeShowAnnouncement(){
  try{
   if(localStorage.getItem(key)==="hide")return;
  }catch(e){}
- $("announcementTitleNode").textContent=announcementTitle;
+ $("announcementTitleNode").innerHTML=titleWithBang(announcementTitle);
  $("announcementBodyNode").innerHTML=announcementBody;
  const chk=$("announcementHideCheck");
  if(chk)chk.checked=false;
@@ -2865,6 +2980,131 @@ function downloadHouseRules(){
  URL.revokeObjectURL(a.href);
 }
 
+
+let tutorialPage = 0;
+
+function titleWithBang(name){
+ return String(name).replace(/!$/, '<span class="modal-title-bang">!</span>');
+}
+
+function tutorialPages(){
+ const classic=currentOption==="classic";
+ const side=classic?"suit":"faction";
+ const enemy=classic?"Computer":"Enemy";
+ const heir=classic?"Heir":"Bloodline";
+ const report=classic?"Outcome Report":"Combat Report";
+ const field=classic?"field":"battlefield";
+ const royalNames=classic
+  ? {J:"Jack",Q:"Queen",K:"King",A:"Ace"}
+  : {J:"Bandit / Jack",Q:"Healer / Queen",K:"Knight / King",A:"Wizard / Ace"};
+
+ return [
+  {
+   title:"1. Build the Field",
+   visual:[2,7,10,5,9,3,8,4,6],
+   body:`Choose a ${side}, then place cards <b>2-10</b> into your 3×3 ${field}. You do not know the ${enemy} layout yet, so your first choice is how to arrange risk.`
+  },
+  {
+   title:"2. Show Reveals the Totals",
+   visual:["8","4","10","6","9","3","2","7","5"],
+   states:["win","dead","win","dead","win","tie","dead","win","dead"],
+   body:`Press <b>Show</b> to reveal both fields. Squares compare directly, but the round is decided by <b>surviving totals</b>, not by how many squares you won. Watch the ${report}.`
+  },
+  {
+   title:"3. Royal Powers",
+   powers:royalNames,
+   body:`Each royal changes the field in a different way. <b>${royalNames.J}</b> claims a tied square. <b>${royalNames.Q}</b> restores one fallen card. <b>${royalNames.K}</b> cancels one opposing survivor. <b>${royalNames.A}</b> swaps two adjacent opposing cards.`
+  },
+  {
+   title:"4. Royal Parlay",
+   royals:[royalNames.J,royalNames.Q,royalNames.K,royalNames.A],
+   body:`After Show, each side may commit one royal or pass. Matching royals draw. Otherwise, higher rank wins: <b>Jack &lt; Queen &lt; King &lt; Ace</b>. Royals are strongest when they change the <b>round total</b>, not just one square.`
+  },
+  {
+   title:`5. Resolve, Score, Protect the ${heir}`,
+   visual:["✓","x","✓","x","✓","=","x","✓","x"],
+   states:["win","dead","win","dead","win","tie","dead","win","dead"],
+   body:`Press <b>Lock</b> to resolve the Royal Parlay and final totals. The higher surviving total scores the <b>difference</b>. Your final unused royal is locked as the <b>${heir}</b>, so sometimes the best move is to accept a small loss and save power for later.`
+  }
+ ];
+}
+
+function tutorialVisual(page){
+ if(page.visual){
+  return `<div class="tutorial-visual">${page.visual.map((v,i)=>`<div class="tutorial-mini-card ${(page.states&&page.states[i])||""}">${v}</div>`).join("")}</div>`;
+ }
+ if(page.powers){
+  const items=[
+   ["J",page.powers.J,"Claims a tied square"],
+   ["Q",page.powers.Q,"Restores one fallen card"],
+   ["K",page.powers.K,"Cancels an opposing survivor"],
+   ["A",page.powers.A,"Swaps two adjacent opposing cards"]
+  ];
+  return `<div class="tutorial-power-grid">${items.map(([rank,name,desc])=>`
+    <div class="tutorial-power-card">
+      <div class="tutorial-royal">${rank}</div>
+      <b>${name}</b>
+      <span>${desc}</span>
+    </div>`).join("")}</div>`;
+ }
+ if(page.royals){
+  return `<div class="tutorial-mini-royals">${page.royals.map(r=>`<div class="tutorial-royal">${r.includes("Jack")?"J":r.includes("Queen")?"Q":r.includes("King")?"K":r.includes("Ace")?"A":r[0]}</div>`).join("")}</div>`;
+ }
+ return "";
+}
+
+function renderTutorial(){
+ const pages=tutorialPages();
+ const page=pages[tutorialPage];
+ $("tutorialContent").innerHTML=`
+  <h2>${titleWithBang(currentOption==="classic"?"Foursuit! Tutorial":"Loresuit! Tutorial")}</h2>
+  <div class="modal-subtitle">${page.title}</div>
+  <div class="tutorial-page">
+    ${tutorialVisual(page)}
+    <p class="tutorial-note">${page.body}</p>
+    <div class="tutorial-count">${tutorialPage+1} / ${pages.length}</div>
+    <div class="tutorial-actions">
+      <button class="btn" onclick="tutorialPrev()" ${tutorialPage===0?"disabled":""}>Back</button>
+      <button class="btn" onclick="tutorialNext()">${tutorialPage===pages.length-1?"Done":"Next"}</button>
+    </div>
+  </div>
+ `;
+}
+
+function openTutorial(){
+ playSfx("modalOpen");
+ tutorialPage=0;
+ renderTutorial();
+ $("tutorialModal").classList.add("active");
+}
+
+function tutorialPrev(){
+ playSfx("optionChange");
+ if(tutorialPage>0)tutorialPage--;
+ renderTutorial();
+}
+
+function tutorialNext(){
+ const pages=tutorialPages();
+ if(tutorialPage>=pages.length-1){
+  forceCloseTutorial();
+  return;
+ }
+ playSfx("optionChange");
+ tutorialPage++;
+ renderTutorial();
+}
+
+function forceCloseTutorial(){
+ playSfx("modalClose");
+ $("tutorialModal").classList.remove("active");
+}
+
+function closeTutorial(e){
+ if(e.target.id==="tutorialModal")forceCloseTutorial();
+}
+
+
 function openRules(){
  playSfx("modalOpen");
  const classic=currentOption==="classic";
@@ -2911,7 +3151,7 @@ function openRules(){
     <div>50 Points</div><div>100 Points</div><div>150 Points</div><div>200 Points</div><div>250 Points</div><div>300 Points</div>
   </div>
 
-  <div class="modal-actions"><button class="btn" onclick="downloadHouseRules()">Download House Rules</button><button class="btn" onclick="forceCloseRules()">Close</button></div>
+  <div class="modal-actions"><button class="btn" onclick="openTutorial()">Tutorial</button><button class="btn" onclick="downloadHouseRules()">Download House Rules</button><button class="btn" onclick="forceCloseRules()">Close</button></div>
  ` : `
   <h2>Rules</h2>
   <div class="modal-subtitle">Suits of War: fantasy battle rules</div>
@@ -2955,7 +3195,7 @@ function openRules(){
     <div><b>Skirmish 50</b></div><div><b>Conflict 100</b></div><div><b>Invasion 150</b></div><div><b>Crusade 200</b></div><div><b>Conquest 250</b></div><div><b>Empire 300</b></div>
   </div>
 
-  <div class="modal-actions"><button class="btn" onclick="downloadHouseRules()">Download House Rules</button><button class="btn" onclick="forceCloseRules()">Close</button></div>
+  <div class="modal-actions"><button class="btn" onclick="openTutorial()">Tutorial</button><button class="btn" onclick="downloadHouseRules()">Download House Rules</button><button class="btn" onclick="forceCloseRules()">Close</button></div>
  `;
  $("rulesContent").innerHTML = rules;
  $("rulesModal").classList.add("active");
