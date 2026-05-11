@@ -1305,6 +1305,45 @@ body.classic #story.active .story{
   .tutorial-power-grid{grid-template-columns:1fr}
 }
 
+
+/* Tips / Tome pass */
+.extra-modal{z-index:12}
+.extra-card{max-width:900px}
+.tip-list{
+  display:grid;
+  gap:8px;
+  margin:12px 0;
+}
+.tip-item{
+  border:2px solid var(--line);
+  background:rgba(0,0,0,.12);
+  padding:10px;
+  line-height:1.75;
+}
+.tip-num{
+  color:var(--gold);
+  margin-right:8px;
+}
+.tome-entry{
+  border-top:3px double var(--line);
+  padding-top:14px;
+  margin-top:16px;
+}
+.tome-entry:first-of-type{
+  border-top:none;
+  padding-top:0;
+  margin-top:0;
+}
+.tome-mark{
+  text-align:center;
+  font-size:28px;
+  line-height:1.4;
+  margin:8px 0;
+}
+.tome-entry p{
+  text-align:left;
+}
+
 @media(max-width:1100px){
   .battle-layout{grid-template-columns:1fr}
   .center-column{order:3}
@@ -1458,6 +1497,11 @@ body.classic #story.active .story{
 
 <div id="tutorialModal" class="modal" onclick="closeTutorial(event)">
   <div class="modal-card tutorial-card" id="tutorialContent"></div>
+</div>
+
+
+<div id="extraModal" class="modal extra-modal" onclick="closeExtra(event)">
+  <div class="modal-card extra-card" id="extraContent"></div>
 </div>
 
 <div id="announcementModal" class="modal">
@@ -3225,26 +3269,95 @@ function openLore(){
   <h3>Credits</h3>
   <p>Design, testing, and production notes are still being finalized for public release.</p>
 
-  <div class="modal-actions"><button class="btn" onclick="forceCloseLore()">Close</button></div>
+  <div class="modal-actions"><button class="btn" onclick="openTips()">Tips</button><button class="btn" onclick="forceCloseLore()">Close</button></div>
  `;
  const fantasyLore = `
-  <h2>The Lore of Aurelorn</h2>
-  <div class="modal-subtitle">Four factions. One deck. No shared crown.</div>
+  <h2>The Deck of Loresuit!</h2>
+  <div class="modal-subtitle">Four factions. Two sides. No shared crown.</div>
   <div class="suit-divider"><span class="red">♥ ♦</span> <span class="black">♣ ♠</span></div>
-  <h3>The Bright-Wounded Realm</h3>
-  <p>Before the four suits were banners, before kings counted borders with roads and towers, the land was called <b>Aurelorn</b>: the Bright-Wounded Realm. It was a wide country of river kingdoms, deep root-forests, black hills, and pale mountain crowns where the night sky seemed close enough to cut with a knife.</p>
-  <h3>The Sundering of Red</h3>
-  <p>From the river cities of <b>Veyrhold</b> rose the <b>Lifeblood Order</b>, believers in road, crown, wall, and law. In the silver observatories of <b>Cael Mora</b>, moon-watchers became the <b>Starshine Druids</b>, red-allied but never fully obedient.</p>
-  <h3>The Sundering of Black</h3>
-  <p>Beyond paved roads, in <b>Gravemarch</b> and <b>Brackenwold</b>, the <b>Rockbreaker Clans</b> kept the old ranges. Beneath <b>Thornmere</b>, the <b>Earthworker Tribes</b> listened to root, soil, seed, and storm.</p>
-  <h3>The Present War</h3>
-  <p>The Lifeblood Order presses east. The Rockbreakers call the roads theft. The Starshine Druids shield red settlements from their moon towers. The Earthworkers answer with root, curse, and raid.</p>
-  <div class="rules-box"><b>There can be alliance in war, but no shared crown in conquest.</b></div>
-  <div class="modal-actions"><button class="btn" onclick="forceCloseLore()">Close</button></div>
+
+  <h3>The Stack</h3>
+  <p>Before the four paths went to war beneath two common banners, the populace lived as one. For eons, they crossed riverlands, hewn dense forests, mined black hills, and ranged pale highlands under a name now lost to all memory.</p>
+
+  <h3>The Cut</h3>
+  <p>The first war was not a war over rule or riches. It was a war of belief. Some felt power moving through omen, star, moon, root, beast, and storm. Others held to iron, stone, tradition, law, craft, and blood.</p>
+
+  <h3>The Shuffle</h3> 
+  <p>In time, each half broke again. Settlers who chose wall, road, ledger, and crown, became the <b>Lifeblood Order</b>. Those who rejected order and kept to the old ranges became the <b>Rockbreaker Clans</b>. Among the magic-touched, those who looked upward and became the <b>Starshine Druids</b>, while the root-bound became the <b>Earthworker Tribes</b>.</p>
+
+  <h3>The Play</h3>
+  <p>In time, the Druids returned to the Order and bound their oaths with royal law. This pact became known as the <b>Red Words</b>. In answer, the Clans sought the Tribes and swore the <b>Black Pact</b>, a promise of mutual enemies more than mutual trust.</p>
+
+  <div class="rules-box"><b> - "There can be alliance in war, but no shared crown in conquest." </b></div>
+  <div class="modal-actions"><button class="btn" onclick="openTome()">Tome</button><button class="btn" onclick="forceCloseLore()">Close</button></div>
  `;
  $("loreContent").innerHTML = currentOption==="classic" ? info : fantasyLore;
  $("loreModal").classList.add("active");
 }
+
+function openTips(){
+ playSfx("modalOpen");
+ const tips = classicTips.map((tip,i)=>`
+  <div class="tip-item"><span class="tip-num">${i+1}.</span>${tip}</div>
+ `).join("");
+ $("extraContent").innerHTML = `
+  <h2>Tips</h2>
+  <div class="modal-subtitle">Classic table notes</div>
+  <div class="suit-divider"><span class="red">♥ ♦</span> <span class="black">♣ ♠</span></div>
+  <div class="tip-list">${tips}</div>
+  <div class="modal-actions"><button class="btn" onclick="forceCloseExtra()">Close</button></div>
+ `;
+ $("extraModal").classList.add("active");
+}
+
+function openTome(){
+ playSfx("modalOpen");
+ $("extraContent").innerHTML = `
+  <h2>Tome</h2>
+  <div class="modal-subtitle">Recent accounts from the war of red and black</div>
+  <div class="suit-divider"><span class="red">♥ ♦</span> <span class="black">♣ ♠</span></div>
+
+  <div class="tome-entry">
+    <div class="tome-mark"><span class="red">♥</span></div>
+    <h3>The Road at Veyrhold</h3>
+    <p>The Lifeblood captain ordered the stones counted twice before sunrise. Every mile marker set into the mud meant one less place where the Clans could claim the road had never existed. The prisoners watched from the ditch while scribes nailed red seals to fresh timber and called it civilization.</p>
+    <p>At noon, a boy from the rear line found three of the markers split clean through, each crack packed with black hill-salt. The captain did not curse. He only told the masons to begin again and sent riders toward the nearest Druid tower.</p>
+  </div>
+
+  <div class="tome-entry">
+    <div class="tome-mark"><span class="red">♦</span></div>
+    <h3>The Last Light of Cael Mora</h3>
+    <p>The Starshine Druids saw the fire before the first torch crossed the lower bridge. They had seen it for seven nights in silver water and star-glass, but prophecy is cruelest when it arrives on time. The tower bells rang once, then stopped, their ropes cut by hands that knew the old passages.</p>
+    <p>By dawn, the lower observatory was ash. The surviving seers told the Order that the Tribes had come like beasts. In private, they admitted the attackers had known exactly which stars to cover.</p>
+  </div>
+
+  <div class="tome-entry">
+    <div class="tome-mark"><span class="black">♣</span></div>
+    <h3>Black Salt on the Mile Stones</h3>
+    <p>The Rockbreaker Clans do not call it raiding when they break a road. They call it returning the hill to itself. Three wagons were taken outside Veyrhold, but the horses were left watered and uncut. The message was not hunger. It was memory.</p>
+    <p>When the Black Pact riders arrived, the Clans let the Earthworkers speak first. That courtesy lasted until the maps were unrolled. No Clan chief likes a map. A map is only a road that has not yet learned to lie flat.</p>
+  </div>
+
+  <div class="tome-entry">
+    <div class="tome-mark"><span class="black">♠</span></div>
+    <h3>Roots Under Thornmere</h3>
+    <p>The Earthworker Tribes buried no dead beneath Thornmere that week. They planted names instead. Each name was pressed into wet soil with seed, tooth, and ash, then covered by a hand that had never held a royal seal.</p>
+    <p>Three days later, red scouts found their own bootprints circling the same black pool again and again. By evening, the trees had shifted enough to close the trail behind them. By morning, the forest had forgotten there had ever been a trail at all.</p>
+  </div>
+
+  <div class="modal-actions"><button class="btn" onclick="forceCloseExtra()">Close</button></div>
+ `;
+ $("extraModal").classList.add("active");
+}
+
+function forceCloseExtra(){
+ playSfx("modalClose");
+ $("extraModal").classList.remove("active");
+}
+function closeExtra(e){
+ if(e.target.id==="extraModal")forceCloseExtra();
+}
+
 
 function forceCloseLore(){playSfx("modalClose");$("loreModal").classList.remove("active")}
 function closeLore(e){if(e.target.id==="loreModal")forceCloseLore()}
